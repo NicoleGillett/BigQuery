@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"google.golang.org/api/iterator"
-	"github.com/urfave/cli"
 )
 
 type BQ struct {
@@ -22,29 +21,41 @@ func NewBigQueryClient(ctx context.Context) (*BQ, error) {
 	}, nil
 }
 
-func (bq *BQ) QueryWiki(ctx context.Context) error {
+func (bq *BQ) TableType(ctx context.Context) error {
 	q := bq.client.Query(`
-	SELECT title
-    FROM ` + "`bigquery-public-data.wikipedia.pageviews_2020`" + `
-    WHERE DATE(datehour) = "2020-03-25"
-    LIMIT 10
+		SELECT metadata.message_type
+    	FROM ` + "`cytora_dev_business_intelligence.address_processing`" + `
+		LIMIT 1
 	`)
 	it, err := q.Read(ctx)
 	if err != nil {
 		return err
 	}
 
-	for {
-		var values []bigquery.Value
-		err := it.Next(&values)
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return err
-		}
-		fmt.Println(values)
+	err = iter(it)
+	if err != nil {
+		return err
 	}
+
+	return nil
+}
+
+func (bq *BQ) TableVersion(ctx context.Context) error {
+	q := bq.client.Query(`
+		SELECT metadata.proto_version
+    	FROM ` + "`cytora_dev_business_intelligence.address_processing`" + `
+		LIMIT 1
+	`)
+	it, err := q.Read(ctx)
+	if err != nil {
+		return err
+	}
+
+	err = iter(it)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -54,8 +65,24 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	err = store.QueryWiki(ctx)
+	err = store.TableType(ctx)
+	err = store.TableVersion(ctx)
 	if err != nil {
 		panic(err)
 	}
+}
+
+func iter(it *bigquery.RowIterator) error {
+	for {
+		var value []bigquery.Value
+		err := it.Next(&value)
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Println(value)
+	}
+	return nil
 }
