@@ -12,20 +12,6 @@ type BQ struct {
 	client *bigquery.Client
 }
 
-func bqAction(c *cli.Context) error {
-	ctx := context.Background()
-	store, err := NewBigQueryClient(ctx)
-	if err != nil {
-		return err
-	}
-	err = store.QueryWiki(ctx)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-
 func NewBigQueryClient(ctx context.Context) (*BQ, error) {
 	client, err := bigquery.NewClient(ctx,"cytora-dev-228110")
 	if err != nil {
