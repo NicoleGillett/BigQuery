@@ -23,9 +23,8 @@ func NewBigQueryClient(ctx context.Context) (*BQ, error) {
 
 func (bq *BQ) TableType(ctx context.Context) error {
 	q := bq.client.Query(`
-		SELECT metadata.message_type
-    	FROM ` + "`cytora_dev_business_intelligence.address_retrieval_temp`" + `
-		WHERE metadata.time = (SELECT MAX(metadata.time) FROM ` + "`cytora_dev_business_intelligence.address_retrieval_temp`" + `)
+		SELECT DISTINCT metadata.proto_version
+    	FROM ` + "`cytora_dev_business_intelligence.properties`" + `
 	`)
 
 	it, err := q.Read(ctx)
@@ -43,9 +42,8 @@ func (bq *BQ) TableType(ctx context.Context) error {
 
 func (bq *BQ) TableVersion(ctx context.Context) error {
 	q := bq.client.Query(`
-		SELECT metadata.proto_version
-    	FROM ` + "`cytora_dev_business_intelligence.address_retrieval_temp`" + `
-		WHERE metadata.time = (SELECT MAX(metadata.time) FROM ` + "`cytora_dev_business_intelligence.address_retrieval_temp`" + `)
+		SELECT DISTINCT metadata.proto_version
+    	FROM ` + "`cytora_dev_business_intelligence.properties`" + `
 	`)
 
 	it, err := q.Read(ctx)
@@ -67,7 +65,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	err = store.TableType(ctx)
+	//err = store.TableType(ctx)
 	err = store.TableVersion(ctx)
 	if err != nil {
 		panic(err)
