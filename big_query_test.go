@@ -17,3 +17,12 @@ func TestExtractType(t *testing.T) {
 	//assert
 	g.Expect(typ).To(Equal("test-type"))
 }
+
+func TestExtractVersion(t *testing.T) {
+	//arrange
+	g := NewGomegaWithT(t)
+	//act
+	typ := ExtractVersion(testURI)
+	//assert
+	g.Expect(typ).To(Equal("test-version"))
+}

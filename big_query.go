@@ -47,3 +47,8 @@ func ExtractType(uri string) string {
 	splitString := strings.Split(uri, "/")
 	return splitString[5]
 }
+
+func ExtractVersion(uri string) string {
+	splitString := strings.Split(uri, "/")
+	return splitString[6]
+}
