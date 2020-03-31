@@ -4,9 +4,13 @@ import (
 	"cloud.google.com/go/bigquery"
 	"context"
 	"fmt"
+	"google.golang.org/api/iterator"
 	"strings"
 )
 
+const (
+	dataset = "cytora_dev_business_intelligence"
+)
 type BQ struct {
 	client *bigquery.Client
 }
@@ -21,11 +25,32 @@ func NewBigQueryClient(ctx context.Context) (*BQ, error) {
 	}, nil
 }
 
-func (bq *BQ) Metadata(service string, ctx context.Context) error {
+func (bq *BQ) Tables(dataset string, ctx context.Context) ([]string, error) {
+	//return tables from dataset
+	it := bq.client.Dataset(dataset).Tables(ctx)
+	_ = it
+	p := make([]string, 0)
+	for {
+		attrs, err := it.Next()
+
+		if err == iterator.Done {
+			break
+		}
+
+		if err != nil {
+			return p, err
+		}
+
+		p = append(p, attrs.TableID)
+	}
+	return p, nil
+}
+
+func (bq *BQ) Metadata(dataset, service string, ctx context.Context) error {
 	// retrieve metadata from BigQuery
-	md, err := bq.client.Dataset("cytora_dev_business_intelligence").Table(service).Metadata(ctx)
+	md, err := bq.client.Dataset(dataset).Table(service).Metadata(ctx)
 	if err != nil {
-		return err
+		panic(err)
 	}
 	fmt.Println(md.ExternalDataConfig.SourceURIs)
 	return nil
@@ -37,7 +62,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	err = store.Metadata("addresses_global", ctx)
+	tables, err := store.Tables(dataset, ctx)
+	if err != nil {
+		panic(err)
+	}
+	err = store.Metadata(dataset, "postcode-validation", ctx)
 	if err != nil {
 		panic(err)
 	}
