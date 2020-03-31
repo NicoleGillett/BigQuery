@@ -26,3 +26,13 @@ func TestExtractVersion(t *testing.T) {
 	//assert
 	g.Expect(typ).To(Equal("test-version"))
 }
+
+func TextTableChecker_Valid(t *testing.T) {
+	//arrange
+	g := NewGomegaWithT(t)
+	service := "test_service_v1_0"
+	//act
+	tableExist := TableChecker(service)
+	//assert
+	g.Expect(tableExist).To(Equal(true))
+}
