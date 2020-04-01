@@ -27,6 +27,15 @@ func TestExtractVersion(t *testing.T) {
 	g.Expect(typ).To(Equal("test-version"))
 }
 
+func TestExtractService(t *testing.T) {
+	//arrange
+	g := NewGomegaWithT(t)
+	//act
+	typ := ExtractService(testURI)
+	//assert
+	g.Expect(typ).To(Equal("test-service"))
+}
+
 func TestVersionChecker_Valid(t *testing.T) {
 	//arrange
 	g := NewGomegaWithT(t)
@@ -50,10 +59,10 @@ func TestVersionChecker_Invalid(t *testing.T) {
 func TestTableMatcher(t *testing.T) {
 	//arrange
 	g := NewGomegaWithT(t)
-	tableName := "test_service_v1_0"
+	tableName := []string{"test_service_v1_0"}
 	service := "test_service"
 	//act
-	tableExist := TableChecker(tableName, service)
+	tableExist := TableMatcher(service, tableName)
 	//assert
-	g.Expect(tableExist).To(Equal(false))
+	g.Expect(tableExist).To(Equal(true))
 }

@@ -71,10 +71,10 @@ func main() {
 		panic(err)
 	}
 	fmt.Println(tables[0])
-	err = store.Metadata(dataset, "postcode-validation", ctx)
-	if err != nil {
-		panic(err)
-	}
+	//err = store.Metadata(dataset, "postcode-validation", ctx)
+	//if err != nil {
+	//	panic(err)
+	//}
 }
 
 func ExtractType(uri string) string {
@@ -87,11 +87,25 @@ func ExtractVersion(uri string) string {
 	return splitString[6]
 }
 
+func ExtractService(uri string) string {
+	splitString := strings.Split(uri, "/")
+	return splitString[4]
+}
+
 func VersionChecker(tableName string) bool {
 	matched, err := regexp.MatchString(`(?m)v\d_\d`, tableName)
 	if err != nil {
 		panic(err)
 	}
 	return matched
+}
+
+func TableMatcher(service string, tables []string) bool {
+	for _, table := range tables {
+		if table[:len(table)-5] == service {
+			return true
+		}
+	}
+	return false
 }
 
