@@ -42,8 +42,10 @@ func (bq *BQ) Tables(dataset string, ctx context.Context) ([]string, error) {
 		if err != nil {
 			return p, err
 		}
-
-		p = append(p, attrs.TableID)
+		//TODO: write test to check that only versioned tables are added.
+		if VersionChecker(attrs.TableID) {
+			p = append(p, attrs.TableID)
+		}
 	}
 	return p, nil
 }

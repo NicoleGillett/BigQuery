@@ -47,13 +47,13 @@ func TestVersionChecker_Invalid(t *testing.T) {
 	g.Expect(tableExist).To(Equal(false))
 }
 
-//func TestTableMatcher(t *testing.T) {
-//	//arrange
-//	g := NewGomegaWithT(t)
-//	tableName := "test_service_v1_0"
-//	service := "test_service"
-//	//act
-//	tableExist := TableChecker(tableName, service)
-//	//assert
-//	g.Expect(tableExist).To(Equal(false))
-//}
+func TestTableMatcher(t *testing.T) {
+	//arrange
+	g := NewGomegaWithT(t)
+	tableName := "test_service_v1_0"
+	service := "test_service"
+	//act
+	tableExist := TableChecker(tableName, service)
+	//assert
+	g.Expect(tableExist).To(Equal(false))
+}
