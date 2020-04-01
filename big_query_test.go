@@ -30,9 +30,10 @@ func TestExtractVersion(t *testing.T) {
 func TextTableChecker_Valid(t *testing.T) {
 	//arrange
 	g := NewGomegaWithT(t)
-	service := "test_service_v1_0"
+	tableName := "test_service_v1_0"
+	service := "test_service"
 	//act
-	tableExist := TableChecker(service)
+	tableExist := TableChecker(tableName, service)
 	//assert
 	g.Expect(tableExist).To(Equal(true))
 }

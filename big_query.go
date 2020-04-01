@@ -5,12 +5,14 @@ import (
 	"context"
 	"fmt"
 	"google.golang.org/api/iterator"
+	"regexp"
 	"strings"
 )
 
 const (
 	dataset = "cytora_dev_business_intelligence"
 )
+
 type BQ struct {
 	client *bigquery.Client
 }
@@ -66,6 +68,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println(tables[0])
 	err = store.Metadata(dataset, "postcode-validation", ctx)
 	if err != nil {
 		panic(err)
@@ -80,4 +83,13 @@ func ExtractType(uri string) string {
 func ExtractVersion(uri string) string {
 	splitString := strings.Split(uri, "/")
 	return splitString[6]
+}
+
+func TableChecker(tableName, service string) bool {
+	var re = regexp.MustCompile(service+"_"+`(?m)v\d_\d`)
+	match := re.FindAllString(tableName, -1)
+	if match == nil {
+		return true
+	}
+	return false
 }
