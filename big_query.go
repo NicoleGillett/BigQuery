@@ -85,11 +85,11 @@ func ExtractVersion(uri string) string {
 	return splitString[6]
 }
 
-func TableChecker(tableName, service string) bool {
-	var re = regexp.MustCompile(service+"_"+`(?m)v\d_\d`)
-	match := re.FindAllString(tableName, -1)
-	if match == nil {
-		return true
+func VersionChecker(tableName string) bool {
+	matched, err := regexp.MatchString(`(?m)v\d_\d`, tableName)
+	if err != nil {
+		panic(err)
 	}
-	return false
+	return matched
 }
+
