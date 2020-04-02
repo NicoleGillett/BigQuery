@@ -50,14 +50,19 @@ func (bq *BQ) Tables(dataset string, ctx context.Context) ([]string, error) {
 	return p, nil
 }
 
-func (bq *BQ) Metadata(dataset, service string, ctx context.Context) error {
-	// retrieve metadata from BigQuery
-	md, err := bq.client.Dataset(dataset).Table(service).Metadata(ctx)
-	if err != nil {
-		panic(err)
+func (bq *BQ) TypeVersion(serviceTables []string, ctx context.Context) map[string][]string {
+	m := make(map[string][]string)
+	for _, table := range serviceTables {
+		md, err := bq.client.Dataset(dataset).Table(table).Metadata(ctx)
+		if err != nil {
+			panic(err)
+		}
+		uri := md.ExternalDataConfig.SourceURIs
+		typ := ExtractType(uri[0])
+		version := ExtractVersion(uri[0])
+		m[typ] = append(m[typ], version)
 	}
-	fmt.Println(md.ExternalDataConfig.SourceURIs)
-	return nil
+	return m
 }
 
 func main() {
@@ -70,11 +75,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(tables[0])
-	//err = store.Metadata(dataset, "postcode-validation", ctx)
-	//if err != nil {
-	//	panic(err)
-	//}
+	serviceTables := TableMatcher("properties", tables)
+	typeVersion := store.TypeVersion(serviceTables, ctx)
+	fmt.Println(typeVersion)
 }
 
 func ExtractType(uri string) string {
@@ -87,11 +90,6 @@ func ExtractVersion(uri string) string {
 	return splitString[6]
 }
 
-func ExtractService(uri string) string {
-	splitString := strings.Split(uri, "/")
-	return splitString[4]
-}
-
 func VersionChecker(tableName string) bool {
 	matched, err := regexp.MatchString(`(?m)v\d_\d`, tableName)
 	if err != nil {
@@ -100,12 +98,14 @@ func VersionChecker(tableName string) bool {
 	return matched
 }
 
-func TableMatcher(service string, tables []string) bool {
+func TableMatcher(service string, tables []string) []string {
+	var serviceTables []string
 	for _, table := range tables {
 		if table[:len(table)-5] == service {
-			return true
+			serviceTables = append(serviceTables, table)
 		}
 	}
-	return false
+	return serviceTables
 }
+
 
