@@ -27,7 +27,7 @@ func NewBigQueryClient(ctx context.Context) (*BQ, error) {
 	}, nil
 }
 
-func (bq *BQ) Tables(dataset string, ctx context.Context) ([]string, error) {
+func (bq *BQ) Tables(dataset, service string, ctx context.Context) ([]string, error) {
 	//return tables from dataset
 	it := bq.client.Dataset(dataset).Tables(ctx)
 	_ = it
@@ -42,12 +42,12 @@ func (bq *BQ) Tables(dataset string, ctx context.Context) ([]string, error) {
 		if err != nil {
 			return p, err
 		}
-		//TODO: write test to check that only versioned tables are added.
 		if VersionChecker(attrs.TableID) {
 			p = append(p, attrs.TableID)
 		}
 	}
-	return p, nil
+	serviceTables := TableMatcher(service, p)
+	return serviceTables, nil
 }
 
 func (bq *BQ) TypeVersion(serviceTables []string, ctx context.Context) map[string][]string {
@@ -71,12 +71,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	tables, err := store.Tables(dataset, ctx)
+	tables, err := store.Tables(dataset, "properties", ctx)
 	if err != nil {
 		panic(err)
 	}
-	serviceTables := TableMatcher("properties", tables)
-	typeVersion := store.TypeVersion(serviceTables, ctx)
+	typeVersion := store.TypeVersion(tables, ctx)
 	fmt.Println(typeVersion)
 }
 
@@ -90,6 +89,7 @@ func ExtractVersion(uri string) string {
 	return splitString[6]
 }
 
+// checks that table name ends with version
 func VersionChecker(tableName string) bool {
 	matched, err := regexp.MatchString(`(?m)v\d_\d$`, tableName)
 	if err != nil {
@@ -98,6 +98,7 @@ func VersionChecker(tableName string) bool {
 	return matched
 }
 
+// finds tables that match service
 func TableMatcher(service string, tables []string) []string {
 	var serviceTables []string
 	for _, table := range tables {
