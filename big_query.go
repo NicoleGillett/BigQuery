@@ -91,7 +91,7 @@ func ExtractVersion(uri string) string {
 }
 
 func VersionChecker(tableName string) bool {
-	matched, err := regexp.MatchString(`(?m)v\d_\d`, tableName)
+	matched, err := regexp.MatchString(`(?m)v\d_\d$`, tableName)
 	if err != nil {
 		panic(err)
 	}
